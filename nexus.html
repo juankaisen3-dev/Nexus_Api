@@ -1,0 +1,1577 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus API - Solutions Digitales Modernes</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+            --accent: #06b6d4;
+            --dark: #0f172a;
+            --darker: #020617;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%);
+        }
+
+        body {
+            background: var(--darker);
+            color: var(--light);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header et Navigation RESPONSIVE */
+        header {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.2rem 0;
+            position: relative;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            z-index: 1001;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--light);
+            font-weight: 500;
+            transition: all 0.3s;
+            position: relative;
+            padding: 0.5rem 0;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background: var(--gradient);
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .cta-button {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.8rem;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.5);
+        }
+
+        .mobile-menu {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        /* Chatbot Alva personnalisé - AMÉLIORÉ */
+        .chatbot-container {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+        }
+
+        .chatbot-toggle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+            border: none;
+        }
+
+        .chatbot-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .chatbot-window {
+            position: absolute;
+            bottom: 80px;
+            right: 0;
+            width: 350px;
+            max-width: 90vw;
+            height: 500px;
+            max-height: 70vh;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chatbot-header {
+            background: var(--gradient);
+            padding: 1.2rem;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .chatbot-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .chatbot-messages {
+            flex: 1;
+            padding: 1.2rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 0.8rem 1rem;
+            border-radius: 18px;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+
+        .message.user {
+            background: var(--primary);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.bot {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--light);
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+
+        .chatbot-input {
+            display: flex;
+            padding: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            gap: 0.5rem;
+        }
+
+        .chatbot-input input {
+            flex: 1;
+            padding: 0.8rem 1rem;
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            outline: none;
+            font-size: 0.9rem;
+        }
+
+        .chatbot-input input:focus {
+            border-color: var(--primary);
+        }
+
+        .chatbot-input button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chatbot-typing {
+            display: none;
+            padding: 0.5rem 1rem;
+            color: var(--gray);
+            font-style: italic;
+        }
+
+        /* Hero Section avec images flottantes RESPONSIVE */
+        .hero {
+            padding: 180px 0 100px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .hero-text h1 {
+            font-size: clamp(2.5rem, 5vw, 3.5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-text p {
+            font-size: 1.2rem;
+            color: var(--gray);
+            margin-bottom: 2.5rem;
+            line-height: 1.8;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .hero-button {
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .hero-button.primary {
+            background: var(--gradient);
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .hero-button.secondary {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .hero-button:hover {
+            transform: translateY(-3px);
+        }
+
+        .hero-visual {
+            position: relative;
+            height: 400px;
+            perspective: 1000px;
+            width: 100%;
+        }
+
+        .floating-card {
+            position: absolute;
+            width: clamp(200px, 25vw, 300px);
+            height: clamp(130px, 15vw, 200px);
+            background: var(--gradient);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: clamp(0.9rem, 1.5vw, 1.2rem);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            transition: transform 0.3s;
+            animation: float 6s ease-in-out infinite;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .card-1 {
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%) rotate(-5deg);
+            animation-delay: 0s;
+        }
+
+        .card-2 {
+            top: clamp(100px, 25vw, 150px);
+            left: clamp(5%, 10vw, 20%);
+            transform: rotate(3deg);
+            animation-delay: 2s;
+            background: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%);
+        }
+
+        .card-3 {
+            top: clamp(100px, 25vw, 150px);
+            right: clamp(5%, 10vw, 20%);
+            transform: rotate(-3deg);
+            animation-delay: 4s;
+            background: linear-gradient(135deg, #06b6d4 0%, #6366f1 100%);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(var(--rotation, 0deg)) translateX(var(--translate-x, 0)); }
+            50% { transform: translateY(-20px) rotate(var(--rotation, 0deg)) translateX(var(--translate-x, 0)); }
+        }
+
+        /* Features Section */
+        .features {
+            padding: 100px 0;
+            background: var(--dark);
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-title h2 {
+            font-size: clamp(2.2rem, 4vw, 2.8rem);
+            margin-bottom: 1rem;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .section-title p {
+            color: var(--gray);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 350px), 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: rgba(30, 41, 59, 0.5);
+            padding: 2.5rem;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(99, 102, 241, 0.3);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+
+        .feature-icon {
+            width: 70px;
+            height: 70px;
+            background: var(--gradient);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card p {
+            color: var(--gray);
+        }
+
+        /* API Demo Section */
+        .api-demo {
+            padding: 100px 0;
+            background: var(--darker);
+        }
+
+        .demo-container {
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 20px;
+            padding: 2.5rem;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .demo-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .demo-tab {
+            padding: 0.8rem 1.5rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .demo-tab.active {
+            background: var(--gradient);
+        }
+
+        .demo-content {
+            display: none;
+        }
+
+        .demo-content.active {
+            display: block;
+        }
+
+        .code-block {
+            background: rgba(15, 23, 42, 0.8);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .demo-result {
+            background: rgba(15, 23, 42, 0.8);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            border: 1px solid rgba(255,255,255,0.1);
+            min-height: 200px;
+        }
+
+        .demo-button {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 1rem;
+        }
+
+        .demo-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        /* Contact Section */
+        .contact {
+            padding: 100px 0;
+            background: var(--darker);
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+        }
+
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .contact-card {
+            background: rgba(30, 41, 59, 0.5);
+            padding: 2rem;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s;
+        }
+
+        .contact-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+        }
+
+        .contact-card h3 {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 1rem;
+            color: var(--accent);
+        }
+
+        .contact-link {
+            color: var(--light);
+            text-decoration: none;
+            font-size: 1.2rem;
+            font-weight: 600;
+            transition: color 0.3s;
+            display: block;
+            margin-top: 0.5rem;
+        }
+
+        .contact-link:hover {
+            color: var(--accent);
+        }
+
+        .contact-form {
+            background: rgba(30, 41, 59, 0.5);
+            padding: 2.5rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--gray);
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--dark);
+            padding: 80px 0 40px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-col h3 {
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+            color: var(--accent);
+        }
+
+        .footer-col ul {
+            list-style: none;
+        }
+
+        .footer-col ul li {
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-col a {
+            color: var(--gray);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-col a:hover {
+            color: var(--accent);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .social-links a {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            color: white;
+            text-decoration: none;
+        }
+
+        .social-links a:hover {
+            background: var(--gradient);
+            transform: translateY(-3px);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: var(--gray);
+        }
+
+        .daniel-tech {
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        /* Canvas 3D */
+        #three-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+        }
+
+        /* RESPONSIVE DESIGN AMÉLIORÉ */
+        @media (max-width: 1024px) {
+            .hero-content {
+                gap: 2rem;
+            }
+            
+            .floating-card {
+                width: clamp(180px, 30vw, 250px);
+                height: clamp(120px, 18vw, 160px);
+            }
+            
+            .footer-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 2rem;
+            }
+            
+            .contact-grid {
+                gap: 2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            /* Navigation mobile */
+            .nav-links {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 280px;
+                height: 100vh;
+                background: rgba(15, 23, 42, 0.98);
+                backdrop-filter: blur(20px);
+                flex-direction: column;
+                justify-content: flex-start;
+                padding-top: 80px;
+                transition: right 0.3s ease;
+                z-index: 1000;
+                border-left: 1px solid rgba(255,255,255,0.1);
+            }
+            
+            .nav-links.active {
+                right: 0;
+            }
+            
+            .mobile-menu {
+                display: block;
+            }
+            
+            .hero-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            
+            .hero-buttons {
+                justify-content: center;
+            }
+            
+            .hero-visual {
+                height: 300px;
+                margin-top: 2rem;
+            }
+            
+            .floating-card {
+                width: clamp(150px, 40vw, 200px);
+                height: clamp(100px, 25vw, 130px);
+                font-size: 0.9rem;
+            }
+            
+            .card-2, .card-3 {
+                top: 120px;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .contact-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .footer-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            
+            .chatbot-window {
+                width: 90vw;
+                right: 5vw;
+            }
+            
+            .demo-tabs {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-text h1 {
+                font-size: 2rem;
+            }
+            
+            .hero-button {
+                padding: 0.8rem 1.5rem;
+                font-size: 0.9rem;
+            }
+            
+            .feature-card, .contact-card, .contact-form, .demo-container {
+                padding: 1.5rem;
+            }
+            
+            .section-title h2 {
+                font-size: 2.2rem;
+            }
+            
+            .chatbot-window {
+                width: 95vw;
+                right: 2.5vw;
+            }
+            
+            .floating-card {
+                width: 140px;
+                height: 90px;
+                font-size: 0.8rem;
+                padding: 0.5rem;
+            }
+            
+            .card-2, .card-3 {
+                top: 100px;
+            }
+            
+            .chatbot-container {
+                bottom: 20px;
+                right: 20px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .floating-card {
+                width: 120px;
+                height: 80px;
+                font-size: 0.7rem;
+            }
+            
+            .card-2, .card-3 {
+                top: 90px;
+            }
+            
+            .chatbot-window {
+                width: 95vw;
+                right: 2.5vw;
+            }
+            
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .hero-button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Loading states */
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .spinner {
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top: 2px solid var(--accent);
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Canvas 3D en arrière-plan -->
+    <canvas id="three-canvas"></canvas>
+
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">NEXUS API</div>
+                <div class="nav-links" id="navLinks">
+                    <a href="#accueil">Accueil</a>
+                    <a href="#services">Services</a>
+                    <a href="#api">API Demo</a>
+                    <a href="#contact">Contact</a>
+                    <button class="cta-button">Commencer</button>
+                </div>
+                <button class="mobile-menu" id="mobileMenu">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="accueil">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1>Solutions API Modernes pour l'Ère Digitale</h1>
+                    <p>Nexus API fournit des interfaces de programmation avancées, sécurisées et évolutives pour propulser vos applications vers de nouveaux sommets.</p>
+                    <div class="hero-buttons">
+                        <a href="#contact" class="hero-button primary">
+                            <i class="fas fa-rocket"></i>
+                            Démarrer un projet
+                        </a>
+                        <a href="#api" class="hero-button secondary">
+                            <i class="fas fa-code"></i>
+                            Tester nos APIs
+                        </a>
+                    </div>
+                </div>
+                <div class="hero-visual">
+                    <div class="floating-card card-1">
+                        <div>API Cloud Native</div>
+                    </div>
+                    <div class="floating-card card-2">
+                        <div>Microservices Sécurisés</div>
+                    </div>
+                    <div class="floating-card card-3">
+                        <div>Data Analytics</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="services">
+        <div class="container">
+            <div class="section-title">
+                <h2>Nos Solutions API</h2>
+                <p>Des interfaces puissantes et flexibles pour tous vos besoins digitaux</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-cloud"></i>
+                    </div>
+                    <h3>API Cloud Native</h3>
+                    <p>Des APIs conçues pour le cloud, avec scalabilité automatique et haute disponibilité garantie.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Sécurité Avancée</h3>
+                    <p>Protocoles de sécurité enterprise avec chiffrement de bout en bout et authentification multi-facteurs.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3>Performance Optimale</h3>
+                    <p>Latence réduite et traitement haute vitesse grâce à nos infrastructures optimisées.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- API Demo Section -->
+    <section class="api-demo" id="api">
+        <div class="container">
+            <div class="section-title">
+                <h2>Démonstration API</h2>
+                <p>Testez nos APIs en temps réel avec ces démonstrations interactives</p>
+            </div>
+            <div class="demo-container">
+                <div class="demo-tabs">
+                    <div class="demo-tab active" data-tab="weather">Météo</div>
+                    <div class="demo-tab" data-tab="currency">Devises</div>
+                    <div class="demo-tab" data-tab="text-analysis">Analyse de texte</div>
+                </div>
+                
+                <div class="demo-content active" id="weather-demo">
+                    <h3>API Météo en Temps Réel</h3>
+                    <p>Obtenez les données météo actuelles pour n'importe quelle ville</p>
+                    
+                    <div class="form-group">
+                        <label for="city-input">Nom de la ville:</label>
+                        <input type="text" id="city-input" placeholder="Ex: Paris, London, Tokyo..." value="Paris">
+                    </div>
+                    
+                    <button class="demo-button" id="weather-btn">
+                        <i class="fas fa-cloud-sun"></i> Obtenir la météo
+                    </button>
+                    
+                    <div class="demo-result" id="weather-result">
+                        <p>Les résultats de l'API s'afficheront ici...</p>
+                    </div>
+                </div>
+                
+                <div class="demo-content" id="currency-demo">
+                    <h3>API Taux de Change</h3>
+                    <p>Convertissez des devises avec les taux de change actuels</p>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label for="amount">Montant:</label>
+                            <input type="number" id="amount" placeholder="100" value="100">
+                        </div>
+                        <div class="form-group">
+                            <label for="from-currency">De:</label>
+                            <select id="from-currency">
+                                <option value="EUR">EUR - Euro</option>
+                                <option value="USD">USD - Dollar US</option>
+                                <option value="GBP">GBP - Livre Sterling</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="to-currency">À:</label>
+                            <select id="to-currency">
+                                <option value="USD">USD - Dollar US</option>
+                                <option value="EUR">EUR - Euro</option>
+                                <option value="GBP">GBP - Livre Sterling</option>
+                                <option value="JPY">JPY - Yen Japonais</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <button class="demo-button" id="currency-btn">
+                        <i class="fas fa-exchange-alt"></i> Convertir
+                    </button>
+                    
+                    <div class="demo-result" id="currency-result">
+                        <p>Les résultats de l'API s'afficheront ici...</p>
+                    </div>
+                </div>
+                
+                <div class="demo-content" id="text-analysis-demo">
+                    <h3>API Analyse de Texte</h3>
+                    <p>Analysez un texte pour en extraire les sentiments et les mots clés</p>
+                    
+                    <div class="form-group">
+                        <label for="text-input">Texte à analyser:</label>
+                        <textarea id="text-input" rows="4" placeholder="Entrez votre texte ici...">Je suis très content de découvrir ces APIs extraordinaires !</textarea>
+                    </div>
+                    
+                    <button class="demo-button" id="text-analysis-btn">
+                        <i class="fas fa-chart-bar"></i> Analyser le texte
+                    </button>
+                    
+                    <div class="demo-result" id="text-analysis-result">
+                        <p>Les résultats de l'API s'afficheront ici...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact" id="contact">
+        <div class="container">
+            <div class="section-title">
+                <h2>Contactez-Nous</h2>
+                <p>Discutons de votre projet et trouvons la solution idéale ensemble</p>
+            </div>
+            <div class="contact-grid">
+                <div class="contact-info">
+                    <div class="contact-card">
+                        <h3><i class="fas fa-phone"></i> Téléphone</h3>
+                        <p>Disponible du lundi au vendredi, 9h-18h</p>
+                        <a href="tel:074085772" class="contact-link">07 40 85 77 2</a>
+                    </div>
+                    <div class="contact-card">
+                        <h3><i class="fas fa-envelope"></i> Email</h3>
+                        <p>Réponse sous 24 heures</p>
+                        <a href="mailto:Ikchigo56@gmail.com" class="contact-link">Ikchigo56@gmail.com</a>
+                    </div>
+                    <div class="contact-card">
+                        <h3><i class="fas fa-comments"></i> Support Live</h3>
+                        <p>Assistance en temps réel</p>
+                        <a href="#" class="contact-link" id="openChatbot">Parler avec Alva</a>
+                    </div>
+                </div>
+                <div class="contact-form">
+                    <form id="contactForm">
+                        <div class="form-group">
+                            <label for="name">Nom complet</label>
+                            <input type="text" id="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="subject">Sujet</label>
+                            <input type="text" id="subject" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="message">Message</label>
+                            <textarea id="message" rows="5" required></textarea>
+                        </div>
+                        <button type="submit" class="cta-button" style="width: 100%;">
+                            <i class="fas fa-paper-plane"></i>
+                            Envoyer le message
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3>NEXUS API</h3>
+                    <p>Solutions API modernes et performantes pour l'ère digitale. Innovation, sécurité et performance.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-github"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-discord"></i></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h3>Services</h3>
+                    <ul>
+                        <li><a href="#">API Development</a></li>
+                        <li><a href="#">Cloud Integration</a></li>
+                        <li><a href="#">Security Audit</a></li>
+                        <li><a href="#">Performance Optimization</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Entreprise</h3>
+                    <ul>
+                        <li><a href="#">À propos</a></li>
+                        <li><a href="#">Carrières</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Presse</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Légal</h3>
+                    <ul>
+                        <li><a href="#">Mentions légales</a></li>
+                        <li><a href="#">Politique de confidentialité</a></li>
+                        <li><a href="#">CGU</a></li>
+                        <li><a href="#">Cookies</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2025 by <span class="daniel-tech">Daniel_Tech</span>. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Chatbot Alva personnalisé -->
+    <div class="chatbot-container">
+        <button class="chatbot-toggle" id="chatbotToggle">
+            <i class="fas fa-robot"></i>
+        </button>
+        <div class="chatbot-window" id="chatbotWindow">
+            <div class="chatbot-header">
+                <div class="chatbot-avatar">A</div>
+                <div>
+                    <h3>Alva Assistant</h3>
+                    <p>Votre assistante personnelle</p>
+                </div>
+            </div>
+            <div class="chatbot-messages" id="chatbotMessages">
+                <div class="message bot">
+                    Bonjour ! Je suis Alva, l'assistante de Daniel. Je suis là pour vous aider avec Nexus API et pour vous accompagner dans tous vos projets digitaux. Comment puis-je vous assister aujourd'hui ? 💫
+                </div>
+            </div>
+            <div class="chatbot-typing" id="chatbotTyping">
+                Alva réfléchit...
+            </div>
+            <div class="chatbot-input">
+                <input type="text" id="chatbotInput" placeholder="Parlez-moi de votre projet...">
+                <button id="sendMessage">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialisation Three.js pour l'arrière-plan 3D
+        function initThreeJS() {
+            const canvas = document.getElementById('three-canvas');
+            if (!canvas) return;
+            
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+            
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            
+            // Créer des particules pour l'effet 3D
+            const particlesGeometry = new THREE.BufferGeometry();
+            const particlesCount = 1500;
+            
+            const posArray = new Float32Array(particlesCount * 3);
+            
+            for(let i = 0; i < particlesCount * 3; i++) {
+                posArray[i] = (Math.random() - 0.5) * 10;
+            }
+            
+            particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            
+            const particlesMaterial = new THREE.PointsMaterial({
+                size: 0.02,
+                color: '#6366f1',
+                transparent: true,
+                opacity: 0.6
+            });
+            
+            const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+            scene.add(particlesMesh);
+            
+            camera.position.z = 3;
+            
+            // Animation
+            function animate() {
+                requestAnimationFrame(animate);
+                
+                particlesMesh.rotation.x += 0.0005;
+                particlesMesh.rotation.y += 0.001;
+                
+                renderer.render(scene, camera);
+            }
+            
+            animate();
+            
+            // Redimensionnement
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+        
+        // Navigation mobile
+        const mobileMenu = document.getElementById('mobileMenu');
+        const navLinks = document.getElementById('navLinks');
+        
+        mobileMenu.addEventListener('click', function() {
+            navLinks.classList.toggle('active');
+            mobileMenu.innerHTML = navLinks.classList.contains('active') ? 
+                '<i class="fas fa-times"></i>' : '<i class="fas fa-bars"></i>';
+        });
+        
+        // Fermer le menu en cliquant sur un lien
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.classList.remove('active');
+                mobileMenu.innerHTML = '<i class="fas fa-bars"></i>';
+            });
+        });
+        
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+        
+        // Form submission
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Message envoyé! Nous vous recontacterons rapidement.');
+            this.reset();
+        });
+        
+        // Chatbot Alva personnalisé avec personnalité de la femme de Daniel
+        const chatbotToggle = document.getElementById('chatbotToggle');
+        const chatbotWindow = document.getElementById('chatbotWindow');
+        const chatbotMessages = document.getElementById('chatbotMessages');
+        const chatbotInput = document.getElementById('chatbotInput');
+        const sendMessage = document.getElementById('sendMessage');
+        const chatbotTyping = document.getElementById('chatbotTyping');
+        const openChatbotLink = document.getElementById('openChatbot');
+        
+        // Ouvrir/fermer le chatbot
+        chatbotToggle.addEventListener('click', function() {
+            chatbotWindow.style.display = chatbotWindow.style.display === 'flex' ? 'none' : 'flex';
+        });
+        
+        // Ouvrir le chatbot depuis le lien "Support Live"
+        openChatbotLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            chatbotWindow.style.display = 'flex';
+        });
+        
+        // Réponses personnalisées d'Alva
+        const botResponses = {
+            'bonjour': 'Bonjour ! Je suis Alva, la complice de Daniel dans tous ses projets. Comment puis-je vous aider aujourd\'hui ? 💖',
+            'salut': 'Salut ! Ravie de vous rencontrer. Daniel m\'a appris à être utile en toutes circonstances. Que souhaitez-vous savoir ? ✨',
+            'hello': 'Hello ! Je suis Alva, l\'assistante dévouée de Daniel. Comment va votre journée ? 🌟',
+            'services': 'Avec Daniel, nous proposons des solutions sur mesure : APIs performantes, design élégant, et un support personnalisé. Quel domaine vous intéresse ? 🚀',
+            'prix': 'Daniel croit en la transparence. Nos tarifs commencent à 99€/mois pour les startups et s\'adaptent selon vos besoins. Souhaitez-vous un devis personnalisé ? 💫',
+            'contact': 'Vous pouvez joindre Daniel au 07 40 85 77 2 ou par email à Ikchigo56@gmail.com. Il est très réactif ! 📞',
+            'aide': 'Je peux vous aider avec : conseils techniques, présentation de nos services, prise de rendez-vous, ou simplement discuter de vos idées. Que préférez-vous ? 💭',
+            'api': 'Les APIs de Daniel sont comme notre relation : fiables, sécurisées et toujours en évolution. Elles s\'adaptent parfaitement à vos besoins spécifiques. 💕',
+            'daniel': 'Daniel est un développeur passionné, créatif et attentionné. Il met tout son cœur dans chaque projet, comme dans tout ce qu\'il entreprend. 🥰',
+            'projet': 'Racontez-moi votre projet ! Daniel adore relever de nouveaux défis et créer des solutions innovantes. Qu\'avez-vous en tête ? 🌈',
+            'amour': 'L\'amour qui unit Daniel et moi se reflète dans la qualité de notre travail. Chaque projet est traité avec passion et dévotion. 💞',
+            'code': 'Le code de Daniel est aussi élégant que son caractère : propre, bien structuré et facile à maintenir. Un vrai plaisir à travailler ! 💻',
+            'default': 'Je ne suis pas sûre de comprendre, mais je peux vous mettre en contact avec Daniel directement au 07 40 85 77 2. Il saura vous aider ! 💫'
+        };
+        
+        // Envoyer un message
+        function sendUserMessage() {
+            const message = chatbotInput.value.trim();
+            if (message === '') return;
+            
+            // Ajouter le message de l'utilisateur
+            addMessage(message, 'user');
+            chatbotInput.value = '';
+            
+            // Simuler la frappe du bot
+            chatbotTyping.style.display = 'block';
+            
+            // Réponse du bot après un délai
+            setTimeout(() => {
+                chatbotTyping.style.display = 'none';
+                const response = getBotResponse(message);
+                addMessage(response, 'bot');
+                
+                // Faire défiler vers le bas
+                chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+            }, 1500);
+        }
+        
+        // Ajouter un message à la conversation
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', sender);
+            messageDiv.textContent = text;
+            chatbotMessages.appendChild(messageDiv);
+            
+            // Faire défiler vers le bas
+            chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+        }
+        
+        // Obtenir une réponse personnalisée d'Alva
+        function getBotResponse(message) {
+            const lowerMessage = message.toLowerCase();
+            
+            for (const keyword in botResponses) {
+                if (lowerMessage.includes(keyword)) {
+                    return botResponses[keyword];
+                }
+            }
+            
+            return botResponses['default'];
+        }
+        
+        // Événements d'envoi de message
+        sendMessage.addEventListener('click', sendUserMessage);
+        
+        chatbotInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendUserMessage();
+            }
+        });
+        
+        // Système d'onglets pour la démo API
+        document.querySelectorAll('.demo-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Désactiver tous les onglets
+                document.querySelectorAll('.demo-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.demo-content').forEach(c => c.classList.remove('active'));
+                
+                // Activer l'onglet cliqué
+                this.classList.add('active');
+                const tabId = this.getAttribute('data-tab');
+                document.getElementById(`${tabId}-demo`).classList.add('active');
+            });
+        });
+        
+        // API Fonctionnelles
+        
+        // API Météo (simulée)
+        document.getElementById('weather-btn').addEventListener('click', function() {
+            const city = document.getElementById('city-input').value || 'Paris';
+            const resultDiv = document.getElementById('weather-result');
+            
+            // Afficher un indicateur de chargement
+            this.innerHTML = '<span class="spinner"></span> Chargement...';
+            this.classList.add('loading');
+            
+            // Simuler un appel API
+            setTimeout(() => {
+                // Réinitialiser le bouton
+                this.innerHTML = '<i class="fas fa-cloud-sun"></i> Obtenir la météo';
+                this.classList.remove('loading');
+                
+                // Générer des données météo simulées
+                const temperatures = {
+                    'Paris': { temp: 18, condition: 'Ensoleillé', humidity: 65 },
+                    'London': { temp: 15, condition: 'Nuageux', humidity: 80 },
+                    'Tokyo': { temp: 22, condition: 'Pluvieux', humidity: 75 },
+                    'New York': { temp: 20, condition: 'Partiellement nuageux', humidity: 70 }
+                };
+                
+                const weatherData = temperatures[city] || { temp: 20, condition: 'Inconnu', humidity: 65 };
+                
+                // Afficher les résultats
+                resultDiv.innerHTML = `
+                    <h4>Météo à ${city}</h4>
+                    <p><strong>Température:</strong> ${weatherData.temp}°C</p>
+                    <p><strong>Condition:</strong> ${weatherData.condition}</p>
+                    <p><strong>Humidité:</strong> ${weatherData.humidity}%</p>
+                    <p><strong>Dernière mise à jour:</strong> ${new Date().toLocaleTimeString()}</p>
+                `;
+            }, 1500);
+        });
+        
+        // API Conversion de devises (simulée)
+        document.getElementById('currency-btn').addEventListener('click', function() {
+            const amount = parseFloat(document.getElementById('amount').value) || 100;
+            const fromCurrency = document.getElementById('from-currency').value;
+            const toCurrency = document.getElementById('to-currency').value;
+            const resultDiv = document.getElementById('currency-result');
+            
+            // Afficher un indicateur de chargement
+            this.innerHTML = '<span class="spinner"></span> Conversion...';
+            this.classList.add('loading');
+            
+            // Simuler un appel API
+            setTimeout(() => {
+                // Réinitialiser le bouton
+                this.innerHTML = '<i class="fas fa-exchange-alt"></i> Convertir';
+                this.classList.remove('loading');
+                
+                // Taux de change simulés
+                const rates = {
+                    'EUR': { 'USD': 1.08, 'GBP': 0.85, 'JPY': 160.5 },
+                    'USD': { 'EUR': 0.93, 'GBP': 0.79, 'JPY': 148.5 },
+                    'GBP': { 'EUR': 1.18, 'USD': 1.27, 'JPY': 189.0 }
+                };
+                
+                let convertedAmount;
+                if (fromCurrency === toCurrency) {
+                    convertedAmount = amount;
+                } else if (rates[fromCurrency] && rates[fromCurrency][toCurrency]) {
+                    convertedAmount = amount * rates[fromCurrency][toCurrency];
+                } else {
+                    // Taux par défaut si non trouvé
+                    convertedAmount = amount * 1.1;
+                }
+                
+                // Afficher les résultats
+                resultDiv.innerHTML = `
+                    <h4>Conversion de devises</h4>
+                    <p><strong>${amount} ${fromCurrency}</strong> = <strong>${convertedAmount.toFixed(2)} ${toCurrency}</strong></p>
+                    <p><strong>Taux de change:</strong> 1 ${fromCurrency} = ${(convertedAmount / amount).toFixed(4)} ${toCurrency}</p>
+                    <p><strong>Dernière mise à jour:</strong> ${new Date().toLocaleTimeString()}</p>
+                `;
+            }, 1500);
+        });
+        
+        // API Analyse de texte (simulée)
+        document.getElementById('text-analysis-btn').addEventListener('click', function() {
+            const text = document.getElementById('text-input').value;
+            const resultDiv = document.getElementById('text-analysis-result');
+            
+            // Afficher un indicateur de chargement
+            this.innerHTML = '<span class="spinner"></span> Analyse...';
+            this.classList.add('loading');
+            
+            // Simuler un appel API
+            setTimeout(() => {
+                // Réinitialiser le bouton
+                this.innerHTML = '<i class="fas fa-chart-bar"></i> Analyser le texte';
+                this.classList.remove('loading');
+                
+                // Analyser le texte (simulation)
+                const wordCount = text.split(/\s+/).filter(word => word.length > 0).length;
+                const charCount = text.length;
+                
+                // Détecter le sentiment (simulation basique)
+                const positiveWords = ['bon', 'bonne', 'excellent', 'super', 'génial', 'content', 'heureux', 'parfait', 'merveilleux'];
+                const negativeWords = ['mauvais', 'mauvaise', 'terrible', 'horrible', 'triste', 'colère', 'fâché', 'déçu'];
+                
+                let positiveScore = 0;
+                let negativeScore = 0;
+                
+                const words = text.toLowerCase().split(/\s+/);
+                words.forEach(word => {
+                    if (positiveWords.includes(word)) positiveScore++;
+                    if (negativeWords.includes(word)) negativeScore++;
+                });
+                
+                let sentiment = 'Neutre';
+                if (positiveScore > negativeScore) sentiment = 'Positif';
+                else if (negativeScore > positiveScore) sentiment = 'Négatif';
+                
+                // Extraire les mots-clés (simulation)
+                const commonWords = ['le', 'la', 'les', 'de', 'des', 'un', 'une', 'et', 'est', 'dans'];
+                const keywords = words
+                    .filter(word => word.length > 3 && !commonWords.includes(word))
+                    .slice(0, 5);
+                
+                // Afficher les résultats
+                resultDiv.innerHTML = `
+                    <h4>Analyse du texte</h4>
+                    <p><strong>Nombre de mots:</strong> ${wordCount}</p>
+                    <p><strong>Nombre de caractères:</strong> ${charCount}</p>
+                    <p><strong>Sentiment détecté:</strong> ${sentiment}</p>
+                    <p><strong>Mots-clés:</strong> ${keywords.join(', ') || 'Aucun mot-clé significatif détecté'}</p>
+                    <p><strong>Analyse effectuée:</strong> ${new Date().toLocaleTimeString()}</p>
+                `;
+            }, 2000);
+        });
+        
+        // Ajuster les cartes flottantes au redimensionnement
+        function adjustFloatingCards() {
+            const cards = document.querySelectorAll('.floating-card');
+            const visual = document.querySelector('.hero-visual');
+            
+            if (window.innerWidth < 768) {
+                cards.forEach(card => {
+                    if (card.classList.contains('card-2')) {
+                        card.style.setProperty('--translate-x', '-10px');
+                    }
+                    if (card.classList.contains('card-3')) {
+                        card.style.setProperty('--translate-x', '10px');
+                    }
+                });
+            } else {
+                cards.forEach(card => {
+                    card.style.setProperty('--translate-x', '0');
+                });
+            }
+        }
+        
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            initThreeJS();
+            adjustFloatingCards();
+            window.addEventListener('resize', adjustFloatingCards);
+        });
+    </script>
+</body>
+</html>
